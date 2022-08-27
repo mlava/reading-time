@@ -9,6 +9,7 @@ const config = {
         },
     ]
 };
+let hashChange = undefined;
 
 export default {
     onload: ({ extensionAPI }) => {
@@ -18,10 +19,11 @@ export default {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-        window.addEventListener('hashchange', async function newPage() {
+        hashChange = async (e) => {
             await sleep(10);
             checkRT();
-        });
+        };
+        window.addEventListener('hashchange', hashChange);
 
         if (!document.getElementById('rtDiv')) {
             var rtDiv = document.createElement('div');
@@ -107,6 +109,7 @@ export default {
         if (document.getElementById('rtDiv')) {
             document.getElementById('rtDiv').remove();
         }
+        window.removeEventListener('hashchange', hashChange);
     }
 }
 
