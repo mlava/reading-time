@@ -1,6 +1,7 @@
 
 let hashChange = undefined;
 var wpm, minutes, seconds;
+let observer = undefined;
 
 export default {
     onload: ({ extensionAPI }) => {
@@ -20,6 +21,31 @@ export default {
         };
         extensionAPI.settings.panel.create(config);
 
+        async function initiateObserver() {
+            const targetNode1 = document.getElementsByClassName("rm-topbar")[0];
+            const config = { attributes: false, childList: true, subtree: true };
+            const callback = function (mutationsList, observer) {
+                for (const mutation of mutationsList) {
+                    if (mutation.addedNodes[0]) {
+                        for (var i = 0; i < mutation.addedNodes[0]?.classList.length; i++) {
+                            if (mutation.addedNodes[0]?.classList[i] == "rm-open-left-sidebar-btn") { // left sidebar has been closed
+                                checkRT();
+                            }
+                        }
+                    } else if (mutation.removedNodes[0]) {
+                        for (var i = 0; i < mutation.removedNodes[0]?.classList.length; i++) {
+                            if (mutation.removedNodes[0]?.classList[i] == "rm-open-left-sidebar-btn") { // left sidebar has been opened
+                                checkRT();
+                            }
+                        }
+                    }
+                }
+            };
+            observer = new MutationObserver(callback);
+            observer.observe(targetNode1, config);
+        }
+        initiateObserver();
+
         if (extensionAPI.settings.get("rt-wpm")) {
             const regex = /^[0-9]{2,3}$/;
             if (extensionAPI.settings.get("rt-wpm").match(regex)) {
@@ -36,7 +62,10 @@ export default {
         }
 
         hashChange = async (e) => {
-            await sleep(10);
+            if (document.getElementById('rtDiv')) {
+                document.getElementById('rtDiv').remove();
+            }
+            await sleep(100);
             checkRT({ extensionAPI });
         };
         window.addEventListener('hashchange', hashChange);
@@ -45,7 +74,6 @@ export default {
 
         async function checkRT() {
             var wordCount = 0;
-
             const startBlock = window.location.href.split('/')[7];
 
             let ancestorrule = `[ 
@@ -74,11 +102,40 @@ export default {
             rtDiv.innerHTML = "";
             rtDiv.id = 'rtDiv';
 
-            var topBarContent = document.querySelector("#app > div > div > div.flex-h-box > div.roam-main > div.rm-files-dropzone > div");
-            var topBarRow = topBarContent.childNodes[1];
 
-            if (topBarContent && topBarRow) {
-                topBarRow.parentNode.insertBefore(rtDiv, topBarRow);
+            if (document.querySelector(".rm-open-left-sidebar-btn")) { // the sidebar is closed
+                await sleep(20);
+                if (document.querySelector("#workspaces")) { // Workspaces extension also installed, so place this to right
+                    let workspaces = document.querySelector("#workspaces");
+                    workspaces.after(rtDiv);
+                } else if (document.querySelector("#todayTomorrow")) { // Yesterday Tomorrow extension also installed, so place this to right
+                    let todayTomorrow = document.querySelector("#todayTomorrow");
+                    todayTomorrow.after(rtDiv);
+                } else if (document.querySelector("span.bp3-button.bp3-minimal.bp3-icon-arrow-right.pointer.bp3-small.rm-electron-nav-forward-btn")) { // electron client needs separate css
+                    let electronArrows = document.getElementsByClassName("rm-electron-nav-forward-btn")[0];
+                    electronArrows.after(rtDiv);
+                } else {
+                    let sidebarButton = document.querySelector(".rm-open-left-sidebar-btn");
+                    sidebarButton.after(rtDiv);
+                }
+            } else { // the sidebar is open
+                await sleep(20);
+                if (document.querySelector("#workspaces")) { // Workspaces extension also installed, so place this to right
+                    let workspaces = document.querySelector("#workspaces");
+                    workspaces.after(rtDiv);
+                } else if (document.querySelector("#todayTomorrow")) { // Yesterday Tomorrow extension also installed, so place this to right
+                    let todayTomorrow = document.querySelector("#todayTomorrow");
+                    todayTomorrow.after(rtDiv);
+                } else if (document.querySelector("span.bp3-button.bp3-minimal.bp3-icon-arrow-right.pointer.bp3-small.rm-electron-nav-forward-btn")) { // electron client needs separate css
+                    let electronArrows = document.getElementsByClassName("rm-electron-nav-forward-btn")[0];
+                    electronArrows.after(rtDiv);
+                } else {
+                    var topBarContent = document.querySelector("#app > div > div > div.flex-h-box > div.roam-main > div.rm-files-dropzone > div");
+                    var topBarRow = topBarContent.childNodes[1];
+                    if (topBarContent && topBarRow) {
+                        topBarRow.parentNode.insertBefore(rtDiv, topBarRow);
+                    }
+                }
             }
 
             for (var i = 0; i < blocks.length; i++) {
@@ -117,6 +174,7 @@ export default {
             document.getElementById('rtDiv').remove();
         }
         window.removeEventListener('hashchange', hashChange);
+        observer.disconnect();
     }
 }
 
