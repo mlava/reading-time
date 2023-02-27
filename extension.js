@@ -105,7 +105,10 @@ export default {
 
             if (document.querySelector(".rm-open-left-sidebar-btn")) { // the sidebar is closed
                 await sleep(20);
-                if (document.querySelector("#workspaces")) { // Workspaces extension also installed, so place this to right
+                if (document.querySelector("#tableOfContents")) { // TOC extension also installed, so place this to right
+                    let toc = document.querySelector("#tableOfContents");
+                    toc.after(rtDiv);
+                } else if (document.querySelector("#workspaces")) { // Workspaces extension also installed, so place this to right
                     let workspaces = document.querySelector("#workspaces");
                     workspaces.after(rtDiv);
                 } else if (document.querySelector("#todayTomorrow")) { // Yesterday Tomorrow extension also installed, so place this to right
@@ -120,7 +123,10 @@ export default {
                 }
             } else { // the sidebar is open
                 await sleep(20);
-                if (document.querySelector("#workspaces")) { // Workspaces extension also installed, so place this to right
+                if (document.querySelector("#tableOfContents")) { // TOC extension also installed, so place this to right
+                    let toc = document.querySelector("#tableOfContents");
+                    toc.after(rtDiv);
+                } else if (document.querySelector("#workspaces")) { // Workspaces extension also installed, so place this to right
                     let workspaces = document.querySelector("#workspaces");
                     workspaces.after(rtDiv);
                 } else if (document.querySelector("#todayTomorrow")) { // Yesterday Tomorrow extension also installed, so place this to right
