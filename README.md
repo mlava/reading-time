@@ -1,5 +1,8 @@
 This extension creates a new entry in your Roam Research topbar, that displays the estimated reading time for the page you are on.
 
+**New:**
+- make sure reading time is loaded to right of my other topbar extensions (Yesterday & Tomorrow, Workspaces, Table of Contents)
+
 It will automatically update when you navigate to a new page.
 
 If you stop or remove the extension the icon and time will also be removed.
